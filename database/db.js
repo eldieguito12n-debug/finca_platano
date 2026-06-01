@@ -106,7 +106,12 @@ const Configuracion = sequelize.define('Configuracion', {
 // ─── Seed & Sync ─────────────────────────────────────────────────────────────
 async function initDB() {
   await sequelize.sync({ alter: false, force: false });
-  await sequelize.query('PRAGMA foreign_keys = ON;');
+  
+  if (!isNetlify) {
+    try {
+      await sequelize.query('PRAGMA foreign_keys = ON;');
+    } catch (e) {}
+  }
 
   // Create tables if not exist
   await sequelize.sync();

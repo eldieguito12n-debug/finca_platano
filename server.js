@@ -3,6 +3,7 @@ const session = require('express-session');
 const MemoryStore = require('memorystore')(session);
 const path = require('path');
 const os = require('os');
+const serverless = require('serverless-http');
 const { initDB } = require('./database/db');
 
 const app = express();
@@ -58,19 +59,35 @@ function getLocalIP() {
   return 'localhost';
 }
 
-// Iniciar Servidor
-initDB().then(() => {
-  app.listen(PORT, '0.0.0.0', () => {
-    const ip = getLocalIP();
-    console.log('\n╔════════════════════════════════════════════╗');
-    console.log('║   🍌  FINCA DE PLÁTANO - SISTEMA ACTIVO   ║');
-    console.log('╚════════════════════════════════════════════╝');
-    console.log(`\n📱  Local:     http://localhost:${PORT}`);
-    console.log(`🌐  Red WiFi:  http://${ip}:${PORT}`);
-    console.log('\n🔑  Usuario: admin  |  Contraseña: admin123');
-    console.log('\nPresiona Ctrl+C para detener el servidor\n');
+// Export para Netlify Functions
+module.exports.handler = async (event, context) => {
+  try {
+    await initDB();
+    const handler = serverless(app);
+    return await handler(event, context);
+  } catch (err) {
+    return {
+      statusCode: 500,
+      body: JSON.stringify({ error: 'Error de servidor', details: err.message })
+    };
+  }
+};
+
+// Iniciar Servidor Local
+if (require.main === module) {
+  initDB().then(() => {
+    app.listen(PORT, '0.0.0.0', () => {
+      const ip = getLocalIP();
+      console.log('\n╔════════════════════════════════════════════╗');
+      console.log('║   🍌  FINCA DE PLÁTANO - SISTEMA ACTIVO   ║');
+      console.log('╚════════════════════════════════════════════╝');
+      console.log(`\n📱  Local:     http://localhost:${PORT}`);
+      console.log(`🌐  Red WiFi:  http://${ip}:${PORT}`);
+      console.log('\n🔑  Usuario: admin  |  Contraseña: admin123');
+      console.log('\nPresiona Ctrl+C para detener el servidor\n');
+    });
+  }).catch(err => {
+    console.error('Error iniciando base de datos:', err);
+    process.exit(1);
   });
-}).catch(err => {
-  console.error('Error iniciando base de datos:', err);
-  process.exit(1);
-});
+}
