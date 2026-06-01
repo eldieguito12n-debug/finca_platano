@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Finca de Plátano – Inicio de Sesión</title>
+  <meta name="description" content="Sistema de administración para finca de plátano.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/login.css">
+</head>
+<body>
+
+  <!-- Fondo: imagen del cultivo a la izquierda, formulario a la derecha -->
+  <div class="login-layout">
+
+    <!-- Panel izquierdo: cultivo de plátano -->
+    <div class="login-hero">
+      <img src="/img/banana_plantation.png" alt="Cultivo de plátano" class="hero-img">
+      <div class="hero-overlay"></div>
+      <div class="hero-content">
+        <div class="hero-badge">🌿 Agricultura Tropical</div>
+        <h2 class="hero-title">Gestión Inteligente<br>de su Finca</h2>
+        <p class="hero-sub">Control total de producción, ventas,<br>inventario y finanzas en un solo lugar.</p>
+        <div class="hero-stats">
+          <div class="hstat"><span class="hstat-icon">📦</span><span>Producción</span></div>
+          <div class="hstat"><span class="hstat-icon">💰</span><span>Ventas</span></div>
+          <div class="hstat"><span class="hstat-icon">📊</span><span>Reportes</span></div>
+          <div class="hstat"><span class="hstat-icon">🏪</span><span>Inventario</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Panel derecho: formulario -->
+    <div class="login-panel">
+      <div class="login-card">
+        <div class="login-header">
+          <div class="logo-circle">🍌</div>
+          <h1 id="login-farm-name">Finca de Plátano</h1>
+          <p>Sistema de Administración</p>
+        </div>
+
+        <form id="loginForm" class="login-form">
+          <div class="form-group">
+            <label for="username"><span class="field-icon">👤</span> Usuario</label>
+            <input type="text" id="username" name="username" placeholder="Ingrese su usuario" autocomplete="username" required>
+          </div>
+
+          <div class="form-group">
+            <label for="password"><span class="field-icon">🔒</span> Contraseña</label>
+            <div class="password-wrap">
+              <input type="password" id="password" name="password" placeholder="Ingrese su contraseña" autocomplete="current-password" required>
+              <button type="button" class="toggle-pwd" id="togglePwd" title="Mostrar contraseña">👁</button>
+            </div>
+          </div>
+
+          <div id="loginError" class="error-msg" style="display:none;"></div>
+
+          <button type="submit" id="loginBtn" class="btn-login">
+            <span class="btn-text">Iniciar Sesión</span>
+            <span class="btn-spinner" style="display:none;">⏳</span>
+          </button>
+        </form>
+
+        <div class="login-footer">
+          <p>🌱 Sistema desarrollado para gestión agrícola</p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/appwrite@14.0.0"></script>
+  <script src="/js/appwrite-config.js"></script>
+  <script src="/js/api.js"></script>
+
+  <script>
+    // Load farm name from config via Appwrite
+    async function loadConfig() {
+      try {
+        const configs = await API.get('/api/configuracion');
+        const farmName = configs.find(c => c.clave === 'nombre_finca');
+        if (farmName) {
+          document.getElementById('login-farm-name').textContent = farmName.valor;
+          document.title = farmName.valor + ' – Inicio de Sesión';
+        }
+      } catch (e) {}
+    }
+    loadConfig();
+
+    const form = document.getElementById('loginForm');
+    const errDiv = document.getElementById('loginError');
+    const btn = document.getElementById('loginBtn');
+    const togglePwd = document.getElementById('togglePwd');
+    const pwdInput = document.getElementById('password');
+
+    togglePwd.addEventListener('click', () => {
+      pwdInput.type = pwdInput.type === 'password' ? 'text' : 'password';
+      togglePwd.textContent = pwdInput.type === 'password' ? '👁' : '🙈';
+    });
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const username = document.getElementById('username').value.trim();
+      const password = pwdInput.value;
+      
+      btn.disabled = true;
+      btn.querySelector('.btn-text').style.display = 'none';
+      btn.querySelector('.btn-spinner').style.display = 'inline';
+      errDiv.style.display = 'none';
+
+      try {
+        const res = await API.login(username, password);
+        if (res.success) {
+          window.location.href = '/app';
+        } else {
+          errDiv.textContent = 'Error al iniciar sesión.';
+          errDiv.style.display = 'block';
+        }
+      } catch (err) {
+        errDiv.textContent = err.message || 'Error de conexión con el servidor.';
+        errDiv.style.display = 'block';
+      } finally {
+        btn.disabled = false;
+        btn.querySelector('.btn-text').style.display = 'inline';
+        btn.querySelector('.btn-spinner').style.display = 'none';
+      }
+    });
+  </script>
+</body>
+</html>
