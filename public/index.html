@@ -70,14 +70,23 @@
 
   </div>
 
+  <script src="https://cdn.jsdelivr.net/npm/appwrite@14.0.0"></script>
+  <script src="/js/appwrite-config.js"></script>
+  <script src="/js/api.js"></script>
+
   <script>
-    // Load farm name from config
-    fetch('/api/configuracion').then(r => r.json()).then(cfg => {
-      if (cfg && cfg.nombre_finca) {
-        document.getElementById('login-farm-name').textContent = cfg.nombre_finca;
-        document.title = cfg.nombre_finca + ' – Inicio de Sesión';
-      }
-    }).catch(() => {});
+    // Load farm name from config via Appwrite
+    async function loadConfig() {
+      try {
+        const configs = await API.get('/api/configuracion');
+        const farmName = configs.find(c => c.clave === 'nombre_finca');
+        if (farmName) {
+          document.getElementById('login-farm-name').textContent = farmName.valor;
+          document.title = farmName.valor + ' – Inicio de Sesión';
+        }
+      } catch (e) {}
+    }
+    loadConfig();
 
     const form = document.getElementById('loginForm');
     const errDiv = document.getElementById('loginError');
@@ -94,25 +103,22 @@
       e.preventDefault();
       const username = document.getElementById('username').value.trim();
       const password = pwdInput.value;
+      
       btn.disabled = true;
       btn.querySelector('.btn-text').style.display = 'none';
       btn.querySelector('.btn-spinner').style.display = 'inline';
       errDiv.style.display = 'none';
+
       try {
-        const res = await fetch('/api/auth/login', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ username, password })
-        });
-        const data = await res.json();
-        if (res.ok && data.success) {
+        const res = await API.login(username, password);
+        if (res.success) {
           window.location.href = '/app';
         } else {
-          errDiv.textContent = data.error || 'Error al iniciar sesión.';
+          errDiv.textContent = 'Error al iniciar sesión.';
           errDiv.style.display = 'block';
         }
       } catch (err) {
-        errDiv.textContent = 'Error de conexión con el servidor.';
+        errDiv.textContent = err.message || 'Error de conexión con el servidor.';
         errDiv.style.display = 'block';
       } finally {
         btn.disabled = false;

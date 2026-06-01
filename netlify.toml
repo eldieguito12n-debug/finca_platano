@@ -1,19 +1,9 @@
 [build]
   publish = "public"
-  functions = "functions"
-
-[functions]
-  node_bundler = "esbuild"
-  external_node_modules = ["sqlite3"]
-
-[[redirects]]
-  from = "/api/*"
-  to = "/.netlify/functions/server/:splat"
-  status = 200
 
 [[redirects]]
   from = "/app"
-  to = "/.netlify/functions/server"
+  to = "/app.html"
   status = 200
 
 [[redirects]]
