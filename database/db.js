@@ -3,29 +3,17 @@ const bcrypt = require('bcryptjs');
 const path = require('path');
 const fs = require('fs');
 
-const dbDir = path.join(__dirname);
+// En Netlify Functions, la única carpeta donde se puede escribir es /tmp
+const isNetlify = process.env.NETLIFY || process.env.CONTEXT === 'production' || process.env.CONTEXT === 'deploy-preview';
+const dbDir = isNetlify ? '/tmp' : path.join(__dirname);
+
 if (!fs.existsSync(dbDir)) fs.mkdirSync(dbDir, { recursive: true });
 
-// Configuración para usar PostgreSQL (Supabase) o SQLite local
-const isProduction = process.env.DATABASE_URL;
-
-const sequelize = isProduction 
-  ? new Sequelize(process.env.DATABASE_URL, {
-      dialect: 'postgres',
-      protocol: 'postgres',
-      dialectOptions: {
-        ssl: {
-          require: true,
-          rejectUnauthorized: false
-        }
-      },
-      logging: false
-    })
-  : new Sequelize({
-      dialect: 'sqlite',
-      storage: path.join(dbDir, 'finca.db'),
-      logging: false
-    });
+const sequelize = new Sequelize({
+  dialect: 'sqlite',
+  storage: path.join(dbDir, 'finca.db'),
+  logging: false
+});
 
 // ─── Models ───────────────────────────────────────────────────────────────────
 const Usuario = sequelize.define('Usuario', {
@@ -116,20 +104,9 @@ const Configuracion = sequelize.define('Configuracion', {
 }, { tableName: 'configuracion', underscored: true });
 
 // ─── Seed & Sync ─────────────────────────────────────────────────────────────
-let isInitialized = false;
-
 async function initDB() {
-  if (isInitialized) return;
-
   await sequelize.sync({ alter: false, force: false });
-  
-  if (!isProduction) {
-    try {
-      await sequelize.query('PRAGMA foreign_keys = ON;');
-    } catch (e) {
-      console.log('PRAGMA not supported or already on');
-    }
-  }
+  await sequelize.query('PRAGMA foreign_keys = ON;');
 
   // Create tables if not exist
   await sequelize.sync();
@@ -199,7 +176,6 @@ async function initDB() {
     await Configuracion.findOrCreate({ where: { clave: d.clave }, defaults: { valor: d.valor } });
   }
 
-  isInitialized = true;
   console.log('✅ Base de datos inicializada correctamente');
 }
 
@@ -211,7 +187,7 @@ function getWeekNumber(d) {
 }
 
 module.exports = {
-  sequelize, Op, isProduction,
+  sequelize, Op,
   Usuario, Produccion, Cliente, Venta,
   CategoriaInventario, Inventario, Compra, Aplicacion,
   CategoriaGasto, Gasto, Configuracion,
