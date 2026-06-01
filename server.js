@@ -51,19 +51,30 @@ function getLocalIP() {
 }
 
 const { initDB } = require('./database/db');
+const serverless = require('serverless-http');
 
-initDB().then(() => {
-  app.listen(PORT, '0.0.0.0', () => {
-    const ip = getLocalIP();
-    console.log('\n╔════════════════════════════════════════════╗');
-    console.log('║   🍌  FINCA DE PLÁTANO - SISTEMA ACTIVO   ║');
-    console.log('╚════════════════════════════════════════════╝');
-    console.log(`\n📱  Local:     http://localhost:${PORT}`);
-    console.log(`🌐  Red WiFi:  http://${ip}:${PORT}`);
-    console.log('\n🔑  Usuario: admin  |  Contraseña: admin123');
-    console.log('\nPresiona Ctrl+C para detener el servidor\n');
+// Export for Netlify Functions
+module.exports.handler = async (event, context) => {
+  await initDB();
+  const handler = serverless(app);
+  return await handler(event, context);
+};
+
+// Local start
+if (process.env.NODE_ENV !== 'production' && require.main === module) {
+  initDB().then(() => {
+    app.listen(PORT, '0.0.0.0', () => {
+      const ip = getLocalIP();
+      console.log('\n╔════════════════════════════════════════════╗');
+      console.log('║   🍌  FINCA DE PLÁTANO - SISTEMA ACTIVO   ║');
+      console.log('╚════════════════════════════════════════════╝');
+      console.log(`\n📱  Local:     http://localhost:${PORT}`);
+      console.log(`🌐  Red WiFi:  http://${ip}:${PORT}`);
+      console.log('\n🔑  Usuario: admin  |  Contraseña: admin123');
+      console.log('\nPresiona Ctrl+C para detener el servidor\n');
+    });
+  }).catch(err => {
+    console.error('Error iniciando base de datos:', err);
+    process.exit(1);
   });
-}).catch(err => {
-  console.error('Error iniciando base de datos:', err);
-  process.exit(1);
-});
+}
