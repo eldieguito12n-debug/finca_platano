@@ -55,7 +55,16 @@ const serverless = require('serverless-http');
 
 // Export for Netlify Functions
 module.exports.handler = async (event, context) => {
-  await initDB();
+  try {
+    await initDB();
+  } catch (dbError) {
+    console.error('CRITICAL: DB Initialization failed:', dbError);
+    return {
+      statusCode: 500,
+      body: JSON.stringify({ error: 'Error de conexión con la base de datos.', details: dbError.message })
+    };
+  }
+  
   const handler = serverless(app);
   return await handler(event, context);
 };

@@ -47,20 +47,25 @@ router.get('/stats', requireAuth, async (req, res) => {
     const sixMonthsAgo = new Date(); sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
     const sixMonthsStr = sixMonthsAgo.toISOString().split('T')[0];
 
+    // Database-agnostic date formatting for grouping
+    const dateFunc = sequelize.getDialect() === 'sqlite' 
+      ? "substr(fecha,1,7)" 
+      : "substring(fecha from 1 for 7)";
+
     const prodMensual = await sequelize.query(`
-      SELECT substr(fecha,1,7) as mes, SUM(cajas) as cajas, SUM(bolsas) as bolsas
+      SELECT ${dateFunc} as mes, SUM(cajas) as cajas, SUM(bolsas) as bolsas
       FROM produccion WHERE fecha >= '${sixMonthsStr}'
       GROUP BY mes ORDER BY mes ASC
     `, { type: sequelize.QueryTypes.SELECT });
 
     const ventasMensual = await sequelize.query(`
-      SELECT substr(fecha,1,7) as mes, SUM(total) as total
+      SELECT ${dateFunc} as mes, SUM(total) as total
       FROM ventas WHERE fecha >= '${sixMonthsStr}'
       GROUP BY mes ORDER BY mes ASC
     `, { type: sequelize.QueryTypes.SELECT });
 
     const gastosMensual = await sequelize.query(`
-      SELECT substr(fecha,1,7) as mes, SUM(valor) as total
+      SELECT ${dateFunc} as mes, SUM(valor) as total
       FROM gastos WHERE fecha >= '${sixMonthsStr}'
       GROUP BY mes ORDER BY mes ASC
     `, { type: sequelize.QueryTypes.SELECT });

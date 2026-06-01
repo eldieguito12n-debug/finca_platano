@@ -116,11 +116,22 @@ const Configuracion = sequelize.define('Configuracion', {
 }, { tableName: 'configuracion', underscored: true });
 
 // ─── Seed & Sync ─────────────────────────────────────────────────────────────
-async function initDB() {
-  await sequelize.sync({ alter: false, force: false });
-  await sequelize.query('PRAGMA foreign_keys = ON;');
+let isInitialized = false;
 
-  // Create tables if not exist (more controlled than force sync)
+async function initDB() {
+  if (isInitialized) return;
+
+  await sequelize.sync({ alter: false, force: false });
+  
+  if (!isProduction) {
+    try {
+      await sequelize.query('PRAGMA foreign_keys = ON;');
+    } catch (e) {
+      console.log('PRAGMA not supported or already on');
+    }
+  }
+
+  // Create tables if not exist
   await sequelize.sync();
 
   // Seed users
@@ -171,7 +182,7 @@ async function initDB() {
     await Gasto.create({ categoria_id: catMO.id, descripcion: 'Jornales semana de cosecha', valor: 450000, fecha: today });
   }
 
-  // Seed default configuracion (always ensure these exist)
+  // Seed default configuracion
   const defaults = [
     { clave: 'nombre_finca',   valor: 'Mi Finca de Plátano' },
     { clave: 'propietario',    valor: 'Propietario' },
@@ -188,6 +199,7 @@ async function initDB() {
     await Configuracion.findOrCreate({ where: { clave: d.clave }, defaults: { valor: d.valor } });
   }
 
+  isInitialized = true;
   console.log('✅ Base de datos inicializada correctamente');
 }
 
@@ -199,7 +211,7 @@ function getWeekNumber(d) {
 }
 
 module.exports = {
-  sequelize, Op,
+  sequelize, Op, isProduction,
   Usuario, Produccion, Cliente, Venta,
   CategoriaInventario, Inventario, Compra, Aplicacion,
   CategoriaGasto, Gasto, Configuracion,
