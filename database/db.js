@@ -4,14 +4,28 @@ const path = require('path');
 const fs = require('fs');
 
 const dbDir = path.join(__dirname);
-
 if (!fs.existsSync(dbDir)) fs.mkdirSync(dbDir, { recursive: true });
 
-const sequelize = new Sequelize({
-  dialect: 'sqlite',
-  storage: path.join(dbDir, 'finca.db'),
-  logging: false
-});
+// Configuración para usar PostgreSQL (Supabase) o SQLite local
+const isProduction = process.env.DATABASE_URL;
+
+const sequelize = isProduction 
+  ? new Sequelize(process.env.DATABASE_URL, {
+      dialect: 'postgres',
+      protocol: 'postgres',
+      dialectOptions: {
+        ssl: {
+          require: true,
+          rejectUnauthorized: false
+        }
+      },
+      logging: false
+    })
+  : new Sequelize({
+      dialect: 'sqlite',
+      storage: path.join(dbDir, 'finca.db'),
+      logging: false
+    });
 
 // ─── Models ───────────────────────────────────────────────────────────────────
 const Usuario = sequelize.define('Usuario', {
