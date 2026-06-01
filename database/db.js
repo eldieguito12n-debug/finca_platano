@@ -3,11 +3,7 @@ const bcrypt = require('bcryptjs');
 const path = require('path');
 const fs = require('fs');
 
-// En Render, el disco persistente está en /opt/render/project/src/database
-// Localmente usaremos la carpeta actual
-const dbDir = process.env.RENDER_DISK_PATH 
-  ? path.join(process.env.RENDER_DISK_PATH) 
-  : __dirname;
+const dbDir = path.join(__dirname);
 
 if (!fs.existsSync(dbDir)) fs.mkdirSync(dbDir, { recursive: true });
 
