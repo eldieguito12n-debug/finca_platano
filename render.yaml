@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: finca-platano
+    env: node
+    plan: free
+    buildCommand: npm install
+    startCommand: node server.js
+    envVars:
+      - key: NODE_VERSION
+        value: 18.0.0
+      - key: SESSION_SECRET
+        generateValue: true
+    disk:
+      name: database-storage
+      mountPath: /opt/render/project/src/database
+      sizeGB: 1

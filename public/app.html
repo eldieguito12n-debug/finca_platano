@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Finca de Plátano – Administración</title>
+  <meta name="description" content="Panel de administración para finca productora de plátano.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/main.css">
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+  <!-- SheetJS (Excel export) -->
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <!-- jsPDF (PDF export) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+</head>
+<body>
+
+<!-- Toast Container -->
+<div id="toast-container"></div>
+
+<div id="app-layout">
+
+  <!-- ═══ SIDEBAR ═══ -->
+  <nav id="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-logo">
+          <div class="sidebar-logo-icon">🍌</div>
+          <div>
+            <div class="sidebar-title" id="sidebar-farm-name">Finca Plátano</div>
+            <div class="sidebar-subtitle">Sistema de Gestión</div>
+          </div>
+        </div>
+    </div>
+
+    <div class="sidebar-nav">
+      <div class="nav-section">Principal</div>
+      <button class="nav-item active" data-page="dashboard" id="nav-dashboard">
+        <span class="nav-icon">🏠</span> Dashboard
+      </button>
+      <button class="nav-item" data-page="cultivo" id="nav-cultivo">
+        <span class="nav-icon">🌿</span> Mi Cultivo
+      </button>
+
+      <div class="nav-section">Producción y Ventas</div>
+      <button class="nav-item" data-page="produccion" id="nav-produccion">
+        <span class="nav-icon">📦</span> Producción
+      </button>
+      <button class="nav-item" data-page="ventas" id="nav-ventas">
+        <span class="nav-icon">💰</span> Ventas
+      </button>
+      <button class="nav-item" data-page="clientes" id="nav-clientes">
+        <span class="nav-icon">👥</span> Clientes
+      </button>
+
+      <div class="nav-section">Insumos y Bodega</div>
+      <button class="nav-item" data-page="inventario" id="nav-inventario">
+        <span class="nav-icon">🏪</span> Inventario
+        <span class="nav-badge" id="badge-stock" style="display:none">!</span>
+      </button>
+      <button class="nav-item" data-page="compras" id="nav-compras">
+        <span class="nav-icon">🛒</span> Compras
+      </button>
+      <button class="nav-item" data-page="aplicaciones" id="nav-aplicaciones">
+        <span class="nav-icon">🌱</span> Aplicaciones
+      </button>
+
+      <div class="nav-section">Finanzas</div>
+      <button class="nav-item" data-page="gastos" id="nav-gastos">
+        <span class="nav-icon">💸</span> Gastos
+      </button>
+      <button class="nav-item" data-page="reportes" id="nav-reportes">
+        <span class="nav-icon">📊</span> Reportes
+      </button>
+
+      <div class="nav-section admin-only" style="display:none">Administración</div>
+      <button class="nav-item admin-only" data-page="usuarios" id="nav-usuarios" style="display:none">
+        <span class="nav-icon">⚙️</span> Usuarios
+      </button>
+      <button class="nav-item admin-only" data-page="configuracion" id="nav-configuracion" style="display:none">
+        <span class="nav-icon">🔧</span> Configuración
+      </button>
+    </div>
+
+    <div class="sidebar-user">
+      <div class="user-avatar">👤</div>
+      <div class="user-info">
+        <div class="user-name" id="sidebar-username">Cargando...</div>
+        <div class="user-role" id="sidebar-role">–</div>
+      </div>
+      <button class="btn-logout" id="btn-logout" title="Cerrar sesión">🚪</button>
+    </div>
+  </nav>
+
+  <!-- Overlay (mobile) -->
+  <div id="sidebar-overlay"></div>
+
+  <!-- ═══ MAIN ═══ -->
+  <div id="main-content">
+    <header id="top-header">
+      <button id="hamburger">☰</button>
+      <div id="page-title">Dashboard</div>
+      <div id="header-date"></div>
+    </header>
+
+    <main id="page-content">
+      <div class="empty-state">
+        <div class="empty-icon"><div class="spinner" style="width:40px;height:40px;"></div></div>
+        <p>Cargando...</p>
+      </div>
+    </main>
+  </div>
+
+</div>
+
+<!-- ═══ SCRIPTS ═══ -->
+<script src="/js/api.js"></script>
+<script src="/js/dashboard.js"></script>
+<script src="/js/produccion.js"></script>
+<script src="/js/ventas.js"></script>
+<script src="/js/clientes.js"></script>
+<script src="/js/inventario.js"></script>
+<script src="/js/compras.js"></script>
+<script src="/js/aplicaciones.js"></script>
+<script src="/js/gastos.js"></script>
+<script src="/js/reportes.js"></script>
+<script src="/js/usuarios.js"></script>
+<script src="/js/configuracion.js"></script>
+<script src="/js/cultivo.js"></script>
+<script src="/js/app.js"></script>
+
+</body>
+</html>
